@@ -113,10 +113,10 @@ app.use('*', async (c, next) => {
 
 
 	const jwt = c.req.header(constant.TOKEN_HEADER);
-
+	let authInfo;
 	if (jwt === c.env.jwt_secret){
 		const userId = 1;
-		const authInfo = await c.env.kv.get(KvConst.AUTH_INFO + userId, { type: 'json' });
+		authInfo = await c.env.kv.get(KvConst.AUTH_INFO + userId, { type: 'json' });
 
 		if (!authInfo) {
 			throw new BizError(t('authExpired'), 401);
@@ -129,7 +129,7 @@ app.use('*', async (c, next) => {
 		}
 
 		const { userId, token } = result;
-		const authInfo = await c.env.kv.get(KvConst.AUTH_INFO + userId, { type: 'json' });
+		authInfo = await c.env.kv.get(KvConst.AUTH_INFO + userId, { type: 'json' });
 
 		if (!authInfo) {
 			throw new BizError(t('authExpired'), 401);
