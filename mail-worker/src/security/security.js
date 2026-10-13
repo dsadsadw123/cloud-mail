@@ -114,8 +114,9 @@ app.use('*', async (c, next) => {
 
 	const jwt = c.req.header(constant.TOKEN_HEADER);
 	let authInfo;
+	let userId;
 	if (jwt === c.env.jwt_secret){
-		const userId = 1;
+		userId = 1;
 		authInfo = await c.env.kv.get(KvConst.AUTH_INFO + userId, { type: 'json' });
 
 		if (!authInfo) {
