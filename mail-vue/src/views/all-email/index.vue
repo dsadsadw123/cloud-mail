@@ -32,10 +32,10 @@
                   :placeholder="$t('select')"
                   class="select"
               >
+                <el-option key="2" :label="$t('selectEmail')" :value="'account'"/>
                 <el-option key="3" :label="$t('sender')" :value="'name'"/>
                 <el-option key="4" :label="$t('subject')" :value="'subject'"/>
                 <el-option key="1" :label="$t('user')" :value="'user'"/>
-                <el-option key="2" :label="$t('selectEmail')" :value="'account'"/>
               </el-select>
               <div class="search-type">
                 <span>{{ selectTitle }}</span>

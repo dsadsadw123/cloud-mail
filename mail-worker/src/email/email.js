@@ -158,6 +158,57 @@ export async function email(message, env, ctx) {
 
 		emailRow = await emailService.completeReceive({ env }, account ? emailConst.status.RECEIVE : emailConst.status.NOONE, emailRow.emailId);
 
+		// Publish every successfully persisted inbound email to the shared WebSocket hub.
+		// The hub filters each connection by its subscribed recipient domain.
+		if (env.MAIL_SOCKET && env.jwt_secret && ctx?.waitUntil) {
+			const broadcastTask = (async () => {
+				try {
+					const id = env.MAIL_SOCKET.idFromName(
+						'cloudmail-global-broadcast'
+					);
+
+					const stub = env.MAIL_SOCKET.get(id);
+					const response = await stub.fetch(
+						'https://mail-socket/publish',
+						{
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-CloudMail-Internal': env.jwt_secret
+							},
+							body: JSON.stringify({
+								emailId: emailRow.emailId,
+								sendEmail: emailRow.sendEmail,
+								toEmail: emailRow.toEmail,
+								createTime: emailRow.createTime || new Date().toISOString()
+							})
+						}
+					);
+
+					const result = await response.text();
+
+					if (!response.ok) {
+						console.error(
+							'CloudMail WebSocket publish rejected:',
+							response.status,
+							result
+						);
+					} else {
+						console.info(
+							'CloudMail WebSocket publish success:',
+							result
+						);
+					}
+				} catch (error) {
+					console.error(
+						'CloudMail WebSocket publish failed:',
+						error
+					);
+				}
+			})();
+
+			ctx.waitUntil(broadcastTask);
+		}
 
 		if (ruleType === settingConst.ruleType.RULE) {
 
