@@ -167,6 +167,7 @@ export async function email(message, env, ctx) {
 						'cloudmail-global-broadcast'
 					);
 
+
 					const stub = env.MAIL_SOCKET.get(id);
 					const response = await stub.fetch(
 						'https://mail-socket/publish',
